@@ -107,8 +107,14 @@ impl<'d, T: AdvancedInstance4Channel> ComplementaryPwm<'d, T> {
     }
 
     /// Enable interrupts.
-    pub fn enable_interrupt(&mut self) {
-        self.inner.enable_update_interrupt(true);
+    pub fn enable_interrupt(&mut self, enable: bool) {
+        self.inner.enable_update_interrupt(enable);
+    }
+
+    /// Clear update interrupt.
+    /// Returns whether the update interrupt flag was set.
+    pub fn clear_update_interrupt(&mut self) -> bool {
+        self.inner.clear_update_interrupt()
     }
         
     /// Set PWM frequency.
