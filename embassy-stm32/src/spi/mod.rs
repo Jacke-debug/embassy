@@ -188,22 +188,22 @@ impl<'d, M: PeriMode> Spi<'d, M> {
         {
             regs.cr2().modify(|w| {
                 let (ds, frxth) = <u8 as SealedWord>::CONFIG;
-                w.set_frxth(frxth);
-                w.set_ds(ds);
-                w.set_ssoe(false);
+                w.set_frxth(frxth); // FIFO reception threshold - set by blocking_transfer_in_place
+                w.set_ds(ds); // Data-size - set by blocking_transfer_in_place 
+                w.set_ssoe(false); // SS output enable, - ?
             });
             regs.cr1().modify(|w| {
-                w.set_cpha(cpha);
-                w.set_cpol(cpol);
+                w.set_cpha(cpha); // Clock phase
+                w.set_cpol(cpol); // Clock polarity
 
                 w.set_mstr(vals::Mstr::MASTER);
-                w.set_br(br);
+                w.set_br(br); // Baudrate 
                 w.set_lsbfirst(lsbfirst);
-                w.set_ssi(true);
-                w.set_ssm(true);
-                w.set_crcen(false);
+                w.set_ssi(true);  // Internal slave select - true or error: ModeFault
+                w.set_ssm(true); // Software slave management, true or error: ModeFault
+                w.set_crcen(false); // CRC disabled
                 w.set_bidimode(vals::Bidimode::UNIDIRECTIONAL);
-                w.set_spe(true);
+                w.set_spe(true); // Enable SPI
             });
         }
         #[cfg(any(spi_v3, spi_v4, spi_v5))]
