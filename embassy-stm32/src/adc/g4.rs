@@ -408,7 +408,8 @@ impl<'d, T: Instance> Adc<'d, T> {
         transfer.await;
     }
     
-    pub fn set_injected_trigger(&mut self, trigger_source: u8, edge: Exten) {
+    /// Set external trigger for injected sequence
+    pub fn set_injected_trigger(&mut self, trigger: u8, edge: Exten) {
         T::regs().jsqr().modify(|r| {
             r.set_jextsel(trigger);
             r.set_jexten(edge);
