@@ -2,7 +2,7 @@
 
 use core::marker::PhantomData;
 
-use stm32_metapac::timer::vals::{Ckd, Mms2};
+pub use stm32_metapac::timer::vals::{Ckd, Mms2};
 
 use super::low_level::{CountingMode, OutputPolarity, Timer};
 use super::simple_pwm::{Ch1, Ch2, Ch3, Ch4, PwmPin};
