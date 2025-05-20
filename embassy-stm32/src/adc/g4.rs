@@ -386,14 +386,33 @@ impl<'d, T: Instance> Adc<'d, T> {
     pub async fn read(
         &mut self,
         rx_dma: Peri<'_, impl RxDma<T>>,
-        sequence: impl ExactSizeIterator<Item = (&mut AnyAdcChannel<T>, SampleTime)>,
         readings: &mut [u16],
     ) {
+        let request = rx_dma.request();
+        let transfer = unsafe {
+            Transfer::new_read(
+                rx_dma,
+                request,
+                T::regs().dr().as_ptr() as *mut u16,
+                readings,
+                Default::default(),
+            )
+        };
+
+        // Start conversion
+        T::regs().cr().modify(|reg| {
+            reg.set_adstart(true);
+        });
+
+        // Wait for conversion sequence to finish.
+        transfer.await;
+    }
+
+    pub fn configure_injected_sequence(
+        &mut self,
+        sequence: impl ExactSizeIterator<Item = (&mut AnyAdcChannel<T>, SampleTime)>,
+    ) {
         assert!(sequence.len() != 0, "Asynchronous read sequence cannot be empty");
-        assert!(
-            sequence.len() == readings.len(),
-            "Sequence length must be equal to readings length"
-        );
         assert!(
             sequence.len() <= 16,
             "Asynchronous read sequence cannot be more than 16 in length"
@@ -448,33 +467,6 @@ impl<'d, T: Instance> Adc<'d, T> {
             reg.set_cont(true);
             reg.set_dmacfg(Dmacfg::ONE_SHOT);
             reg.set_dmaen(Dmaen::ENABLE);
-        });
-
-        let request = rx_dma.request();
-        let transfer = unsafe {
-            Transfer::new_read(
-                rx_dma,
-                request,
-                T::regs().dr().as_ptr() as *mut u16,
-                readings,
-                Default::default(),
-            )
-        };
-
-        // Start conversion
-        T::regs().cr().modify(|reg| {
-            reg.set_adstart(true);
-        });
-
-        // Wait for conversion sequence to finish.
-        transfer.await;
-
-        // Ensure conversions are finished.
-        Self::cancel_conversions();
-
-        // Reset configuration.
-        T::regs().cfgr().modify(|reg| {
-            reg.set_cont(false);
         });
     }
 
