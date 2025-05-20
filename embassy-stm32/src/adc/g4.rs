@@ -5,7 +5,7 @@ use pac::adc::vals::{Adcaldif, Difsel, Exten};
 #[cfg(stm32g4)]
 use pac::adc::vals::{Adcaldif, Difsel, Exten, Rovsm, Trovs};
 use pac::adccommon::vals::Presc;
-use stm32_metapac::adc::vals::{Adstp, Dmacfg, Dmaen};
+pub use stm32_metapac::adc::vals::{Adstp, Dmacfg, Dmaen, Exten};
 
 use super::{blocking_delay_us, Adc, AdcChannel, AnyAdcChannel, Instance, Resolution, RxDma, SampleTime};
 use crate::adc::SealedAdcChannel;
@@ -408,7 +408,7 @@ impl<'d, T: Instance> Adc<'d, T> {
         transfer.await;
     }
     
-    pub fn set_injected_trigger(&mut self, trigger: u8, edge: u32) {
+    pub fn set_injected_trigger(&mut self, trigger_source: u8, edge: Exten) {
         T::regs().jsqr().modify(|r| {
             r.set_jextsel(trigger);
             r.set_jexten(edge);
