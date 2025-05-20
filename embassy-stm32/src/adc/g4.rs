@@ -5,7 +5,7 @@ use pac::adc::vals::{Adcaldif, Difsel, Exten};
 #[cfg(stm32g4)]
 use pac::adc::vals::{Adcaldif, Difsel, Exten, Rovsm, Trovs};
 use pac::adccommon::vals::Presc;
-use stm32_metapac::adc::vals::{Adstp, Dmacfg, Dmaen};
+use stm32_metapac::adc::vals::{Adstp, Dmacfg, Dmaen, Jextsel, Jexten};
 
 use super::{blocking_delay_us, Adc, AdcChannel, AnyAdcChannel, Instance, Resolution, RxDma, SampleTime};
 use crate::adc::SealedAdcChannel;
@@ -413,6 +413,7 @@ impl<'d, T: Instance> Adc<'d, T> {
             r.set_jextsel(trigger);
             r.set_jexten(edge);
         });
+        T::regs().ier().modify(|r| r.set_jeocie(true));
     }
 
     // TODO: How to ensure matching length between configured sequence and the readings?
