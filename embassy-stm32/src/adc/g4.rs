@@ -407,6 +407,13 @@ impl<'d, T: Instance> Adc<'d, T> {
         // Wait for conversion sequence to finish.
         transfer.await;
     }
+    
+    pub fn set_injected_trigger(&mut self, trigger: Jextsel, edge: Jexten) {
+        T::regs().jsqr().modify(|r| {
+            r.set_jextsel(trigger);
+            r.set_jexten(edge);
+        });
+    }
 
     // TODO: How to ensure matching length between configured sequence and the readings?
     pub fn configure_injected_sequence<'a>(
