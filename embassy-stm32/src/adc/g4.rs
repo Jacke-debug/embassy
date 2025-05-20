@@ -408,6 +408,7 @@ impl<'d, T: Instance> Adc<'d, T> {
         transfer.await;
     }
 
+    // TODO: How to ensure matching length between configured sequence and the readings?
     pub fn configure_injected_sequence<'a>(
         &mut self,
         sequence: impl ExactSizeIterator<Item = (&'a mut AnyAdcChannel<T>, SampleTime)>,
