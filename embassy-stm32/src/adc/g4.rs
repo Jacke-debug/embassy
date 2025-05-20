@@ -410,7 +410,7 @@ impl<'d, T: Instance> Adc<'d, T> {
 
     pub fn configure_injected_sequence(
         &mut self,
-        sequence: impl ExactSizeIterator<Item = (&mut AnyAdcChannel<T>, SampleTime)>,
+        sequence: impl ExactSizeIterator<Item = (&'static mut AnyAdcChannel<T>, SampleTime)>,
     ) {
         assert!(sequence.len() != 0, "Asynchronous read sequence cannot be empty");
         assert!(
