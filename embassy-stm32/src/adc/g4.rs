@@ -410,11 +410,11 @@ impl<'d, T: Instance> Adc<'d, T> {
     
     /// Set external trigger for regular conversion sequence
     pub fn set_regular_conversion_trigger(&mut self, trigger: u8, edge: u8) {
-        T::regs().jsqr().modify(|r| {
+        T::regs().cfgr().modify(|r| {
             r.set_extsel(trigger); // ADC group regular external trigger source
             r.set_exten(edge); // ADC group regular external trigger polarity
         });
-        T::regs().ier().modify(|r| r.set_eocie(true));
+        T::regs().ier().modify(|r| r.set_eosie(true)); // group regular end of sequence conversions interrupt
     }
 
     // TODO: How to ensure matching length between configured sequence and the readings?
