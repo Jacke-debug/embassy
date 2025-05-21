@@ -478,6 +478,11 @@ impl<'d, T: Instance> Adc<'d, T> {
             reg.set_dmacfg(Dmacfg::ONE_SHOT);
             reg.set_dmaen(Dmaen::DISABLE);
         });
+        
+        // Start conversion
+        T::regs().cr().modify(|reg| {
+            reg.set_adstart(true);
+        });
     }
 
     fn configure_channel(channel: &mut impl AdcChannel<T>, sample_time: SampleTime) {
