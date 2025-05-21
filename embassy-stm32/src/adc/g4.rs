@@ -417,6 +417,13 @@ impl<'d, T: Instance> Adc<'d, T> {
         T::regs().ier().modify(|r| r.set_eosie(true)); // group regular end of sequence conversions interrupt
     }
 
+    /// Clear end of sequence flag
+    pub fn clear_eos(&mut self) {
+        T::regs().isr().modify(|r| {
+            r.set_eos(true); // ADC group regular external trigger source
+        });
+    }
+
     // TODO: How to ensure matching length between configured sequence and the readings?
     pub fn configure_regular_sequence<'a>(
         &mut self,
