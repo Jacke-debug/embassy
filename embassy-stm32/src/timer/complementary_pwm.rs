@@ -97,6 +97,11 @@ impl<'d, T: AdvancedInstance4Channel> ComplementaryPwm<'d, T> {
         self.inner.set_mms2_selection(mms2);
     }
 
+    /// Enable update events
+    pub fn enable_update_events(&mut self, enable: bool) {
+        self.inner.enable_update_interrupt(enable);
+    }
+
     /// Enable interrupts or disable interrupts.
     pub fn enable_interrupt(&mut self, enable: bool) {
         self.inner.enable_update_interrupt(enable);
