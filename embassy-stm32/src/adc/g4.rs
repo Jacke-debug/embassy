@@ -427,7 +427,9 @@ impl<'d, T: Instance> Adc<'d, T> {
     // TODO: How to ensure matching length between configured sequence and the readings?
     pub fn configure_regular_sequence<'a>(
         &mut self,
+        rx_dma: Peri<'_, impl RxDma<T>>,
         sequence: impl ExactSizeIterator<Item = (&'a mut AnyAdcChannel<T>, SampleTime)>,
+        readings: &mut [u16],
     ) {
         assert!(sequence.len() != 0, "Asynchronous read sequence cannot be empty");
         assert!(
@@ -490,6 +492,23 @@ impl<'d, T: Instance> Adc<'d, T> {
         T::regs().cr().modify(|reg| {
             reg.set_adstart(true);
         });
+            
+        let request = rx_dma.request();
+        let transfer = unsafe {
+            Transfer::new_read(
+                rx_dma,
+                request,
+                T::regs().dr().as_ptr() as *mut u16,
+                readings,
+                Default::default(),
+            )
+        };
+
+        // Start conversion
+        T::regs().cr().modify(|reg| {
+            reg.set_adstart(true);
+        });
+
     }
 
     fn configure_channel(channel: &mut impl AdcChannel<T>, sample_time: SampleTime) {
