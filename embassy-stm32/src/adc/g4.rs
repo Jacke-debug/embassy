@@ -408,17 +408,17 @@ impl<'d, T: Instance> Adc<'d, T> {
         transfer.await;
     }
     
-    /// Set external trigger for injected sequence
-    pub fn set_injected_trigger(&mut self, trigger: u8, edge: Exten) {
+    /// Set external trigger for regular conversion sequence
+    pub fn set_regular_conversion_trigger(&mut self, trigger: u8, edge: u8) {
         T::regs().jsqr().modify(|r| {
-            r.set_jextsel(trigger);
-            r.set_jexten(edge);
+            r.set_extsel(trigger); // ADC group regular external trigger source
+            r.set_exten(edge); // ADC group regular external trigger polarity
         });
-        T::regs().ier().modify(|r| r.set_jeocie(true));
+        T::regs().ier().modify(|r| r.set_eocie(true));
     }
 
     // TODO: How to ensure matching length between configured sequence and the readings?
-    pub fn configure_injected_sequence<'a>(
+    pub fn configure_regular_sequence<'a>(
         &mut self,
         sequence: impl ExactSizeIterator<Item = (&'a mut AnyAdcChannel<T>, SampleTime)>,
     ) {
