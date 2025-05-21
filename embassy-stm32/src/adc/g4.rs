@@ -409,7 +409,7 @@ impl<'d, T: Instance> Adc<'d, T> {
     }
     
     /// Set external trigger for regular conversion sequence
-    pub fn set_regular_conversion_trigger(&mut self, trigger: u8, edge: u8) {
+    pub fn set_regular_conversion_trigger(&mut self, trigger: u8, edge: Exten) {
         T::regs().cfgr().modify(|r| {
             r.set_extsel(trigger); // ADC group regular external trigger source
             r.set_exten(edge); // ADC group regular external trigger polarity
