@@ -425,10 +425,10 @@ impl<'d, T: Instance> Adc<'d, T> {
     }
 
     // TODO: How to ensure matching length between configured sequence and the readings?
-    pub fn configure_regular_sequence<'a>(
+    pub fn configure_regular_sequence(
         &mut self,
         rx_dma: Peri<'_, impl RxDma<T>>,
-        sequence: impl ExactSizeIterator<Item = (&'a mut AnyAdcChannel<T>, SampleTime)>,
+        sequence: impl ExactSizeIterator<Item = (&mut AnyAdcChannel<T>, SampleTime)>,
         readings: &mut [u16],
     ) {
         assert!(sequence.len() != 0, "Asynchronous read sequence cannot be empty");
