@@ -433,6 +433,10 @@ impl<'d, T: Instance> Adc<'d, T> {
     ) {
         assert!(sequence.len() != 0, "Asynchronous read sequence cannot be empty");
         assert!(
+            sequence.len() == readings.len(),
+            "Sequence length must be equal to readings length"
+        );
+        assert!(
             sequence.len() <= 16,
             "Asynchronous read sequence cannot be more than 16 in length"
         );
