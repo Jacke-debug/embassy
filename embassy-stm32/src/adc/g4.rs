@@ -389,7 +389,7 @@ impl<'d, T: Instance> Adc<'d, T> {
         &mut self,
         rx_dma: Peri<'_, impl RxDma<T>>,
         sequence: impl ExactSizeIterator<Item = (&mut AnyAdcChannel<T>, SampleTime)>,
-         readings: &mut [u16],
+        readings: &mut [u16],
     ) {
         assert!(sequence.len() != 0, "Asynchronous read sequence cannot be empty");
         assert!(
@@ -400,16 +400,20 @@ impl<'d, T: Instance> Adc<'d, T> {
             sequence.len() <= 16,
             "Asynchronous read sequence cannot be more than 16 in length"
         );
+
         // Ensure no conversions are ongoing and ADC is enabled.
         Self::cancel_conversions();
         self.enable();
+
         // Set sequence length
         T::regs().sqr1().modify(|w| {
             w.set_l(sequence.len() as u8 - 1);
         });
+
         // Configure channels and ranks
         for (_i, (channel, sample_time)) in sequence.enumerate() {
             Self::configure_channel(channel, sample_time);
+
             match _i {
                 0..=3 => {
                     T::regs().sqr1().modify(|w| {
@@ -434,6 +438,7 @@ impl<'d, T: Instance> Adc<'d, T> {
                 _ => unreachable!(),
             }
         }
+
         // Set continuous mode with oneshot dma.
         // Clear overrun flag before starting transfer.
         T::regs().isr().modify(|reg| {
@@ -482,6 +487,7 @@ impl<'d, T: Instance> Adc<'d, T> {
         })
     }
 
+    /// Configure a sequence of injected channels
     pub fn configure_injected_sequence<'a>(
         &mut self,
         sequence: impl ExactSizeIterator<Item = (&'a mut AnyAdcChannel<T>, SampleTime)>,
