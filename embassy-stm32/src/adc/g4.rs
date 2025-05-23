@@ -435,7 +435,7 @@ impl<'d, T: Instance> Adc<'d, T> {
 
     /// Clear injcted end of sequence flag
     pub fn clear_injcted_eos(&mut self) -> u16 {
-        let data = T.regs().jdr().read().jdata();   
+        let data = self.regs().jdr().read().jdata();   
         // Clear JEOS by writing 1
         T::regs().isr().modify(|r| r.set_jeos(true));
         data
