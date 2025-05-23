@@ -238,11 +238,6 @@ impl<'d, T: CoreInstance> Timer<'d, T> {
         T::BITS
     }
 
-    /// enable update event
-    pub fn enable_update_event(&self, enable: bool) {
-        self.regs_core().egr().write(|r| r.set_ug(enable));
-    }
-
     /// Set the frequency of how many times per second the timer counts up to the max value or down to 0.
     ///
     /// This means that in the default edge-aligned mode,
