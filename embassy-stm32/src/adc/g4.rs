@@ -437,11 +437,11 @@ impl<'d, T: Instance> Adc<'d, T> {
     pub fn clear_injected_eos(&mut self) -> [u16; 4] {
         let mut data = [0u16; 4];
         for i in 0..4 {
-            data[i] = self.regs().jdr(i).read().jdata().bits();
+            data[i] = T::regs().jdr(i).read().jdata().bits();
         }
 
         // Clear JEOS by writing 1
-        self.regs().isr().modify(|r| r.set_jeos(true));
+        T::regs().isr().modify(|r| r.set_jeos(true));
         data
     }
 
