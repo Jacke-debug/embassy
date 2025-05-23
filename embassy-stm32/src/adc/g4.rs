@@ -3,7 +3,7 @@
 use pac::adc::vals::{Adcaldif, Difsel, Exten};
 #[allow(unused)]
 #[cfg(stm32g4)]
-pub use pac::adc::vals::{Adcaldif, Difsel, Exten, Rovsm, Trovs};
+pub use pac::adc::vals::{Adcaldif, Difsel, Exten, Rovsm, Trovsm, Multi};
 use pac::adccommon::vals::Presc;
 pub use stm32_metapac::adc::vals::{Adstp, Dmacfg, Dmaen};
 
@@ -517,6 +517,13 @@ impl<'d, T: Instance> Adc<'d, T> {
         T::regs().cr().modify(|reg| {
             reg.set_adstart(true);
         });
+    }
+
+    // Multi ADC mode selection
+    pub fn configure_multi_mode(&mut self, val: Multi) {
+        T::common_regs().ccr().modify(|reg| {
+            reg.set_multi(val);
+        })
     }
 
     // TODO: How to ensure matching length between configured sequence and the readings?
