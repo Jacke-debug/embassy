@@ -3,8 +3,8 @@
 use pac::adc::vals::{Adcaldif, Difsel, Exten};
 #[allow(unused)]
 #[cfg(stm32g4)]
-pub use pac::adc::vals::{Adcaldif, Difsel, Exten, Rovsm, Trovsm, Multi};
-use pac::adccommon::vals::Presc;
+pub use pac::adc::vals::{Adcaldif, Difsel, Exten, Rovsm, Trovs};
+pub use pac::adccommon::vals::{Presc, Multi};
 pub use stm32_metapac::adc::vals::{Adstp, Dmacfg, Dmaen};
 
 use super::{blocking_delay_us, Adc, AdcChannel, AnyAdcChannel, Instance, Resolution, RxDma, SampleTime};
