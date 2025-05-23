@@ -417,11 +417,29 @@ impl<'d, T: Instance> Adc<'d, T> {
         T::regs().ier().modify(|r| r.set_eosie(true)); // group regular end of sequence conversions interrupt
     }
 
-    /// Clear end of sequence flag
+    /// Set external trigger for injected conversion sequence
+    pub fn set_injected_conversion_trigger(&mut self, trigger: u8, edge: Exten) {
+        T::regs().jsqr().modify(|r| {
+            r.set_jextsel(trigger); // ADC group injected external trigger source
+            r.set_jexten(edge); // ADC group injected external trigger polarity
+        });
+        T::regs().ier().modify(|r| r.set_jeosie(true)); // group injected end of sequence conversions interrupt
+    }
+
+    /// Clear regular end of sequence flag
     pub fn clear_eos(&mut self) {
         T::regs().isr().modify(|r| {
             r.set_eos(true); // ADC group regular external trigger source
         });
+    }
+
+    /// Clear injcted end of sequence flag
+    pub fn clear_injcted_eos(&mut self) -> u16 {
+        let data = T.regs().jdr().jdata().read();
+        T::regs().isr().modify(|r| {
+            r.set_jeos(true); // ADC group injected external trigger source
+        });
+        data
     }
 
     // TODO: How to ensure matching length between configured sequence and the readings?
@@ -489,30 +507,82 @@ impl<'d, T: Instance> Adc<'d, T> {
             reg.set_discen(false);
             reg.set_cont(false); // False for interrupt triggered measurements
             reg.set_dmacfg(Dmacfg::ONE_SHOT);
-            reg.set_dmaen(Dmaen::ENABLE);
+            reg.set_dmaen(Dmaen::DISABLE);
         });
         
         // Start conversion
         T::regs().cr().modify(|reg| {
             reg.set_adstart(true);
         });
-            
-        let request = rx_dma.request();
-        let transfer = unsafe {
-            Transfer::new_read(
-                rx_dma,
-                request,
-                T::regs().dr().as_ptr() as *mut u16,
-                readings,
-                Default::default(),
-            )
-        };
+    }
 
+    // TODO: How to ensure matching length between configured sequence and the readings?
+    pub fn configure_injected_sequence(
+        &mut self,
+        rx_dma: Peri<'_, impl RxDma<T>>,
+        sequence: impl ExactSizeIterator<Item = (&mut AnyAdcChannel<T>, SampleTime)>,
+    ) {
+        assert!(sequence.len() != 0, "Asynchronous read sequence cannot be empty");
+        assert!(
+            sequence.len() <= 16,
+            "Asynchronous read sequence cannot be more than 16 in length"
+        );
+
+        // Ensure no conversions are ongoing and ADC is enabled.
+        Self::cancel_conversions();
+        self.enable();
+
+        // Set sequence length
+        T::regs().jsqr().modify(|w| {
+            w.set_jl(sequence.len() as u8 - 1);
+        });
+
+        // Configure channels and ranks
+        for (n, (channel, sample_time)) in sequence.enumerate() {
+            Self::configure_channel(channel, sample_time);
+
+            match n {
+                0..=3 => {
+                    T::regs().jsqr().modify(|w| {
+                        w.set_jsq(n, channel.channel());
+                    });
+                }
+                4..=8 => {
+                    T::regs().jsqr().modify(|w| {
+                        w.set_jsq(n - 4, channel.channel());
+                    });
+                }
+                9..=13 => {
+                    T::regs().jsqr().modify(|w| {
+                        w.set_jsq(n - 9, channel.channel());
+                    });
+                }
+                14..=15 => {
+                    T::regs().jsqr().modify(|w| {
+                        w.set_jsq(n - 14, channel.channel());
+                    });
+                }
+                _ => unreachable!(),
+            }
+        }
+
+        // Set continuous mode with oneshot dma.
+        // Clear overrun flag before starting transfer.
+        // T::regs().isr().modify(|reg| {
+        //     reg.set_ovr(true);
+        // });
+
+        T::regs().cfgr().modify(|reg| {
+            reg.set_discen(false);
+            reg.set_cont(false); // False for interrupt triggered measurements
+            reg.set_dmacfg(Dmacfg::ONE_SHOT);
+            reg.set_dmaen(Dmaen::DISABLE);
+        });
+        
         // Start conversion
         T::regs().cr().modify(|reg| {
             reg.set_adstart(true);
         });
-
     }
 
     fn configure_channel(channel: &mut impl AdcChannel<T>, sample_time: SampleTime) {
