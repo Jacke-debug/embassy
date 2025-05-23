@@ -4,9 +4,9 @@ use pac::adc::vals::{Adcaldif, Difsel, Exten};
 #[allow(unused)]
 #[cfg(stm32g4)]
 pub use pac::adc::vals::{Adcaldif, Difsel, Exten, Rovsm, Trovs};
-pub use pac::adccommon::vals::{Presc, Multi};
+pub use pac::adccommon::vals::Presc;
 pub use stm32_metapac::adc::vals::{Adstp, Dmacfg, Dmaen};
-
+pub use stm32_metapac::adccommon::vals::Multi;
 use super::{blocking_delay_us, Adc, AdcChannel, AnyAdcChannel, Instance, Resolution, RxDma, SampleTime};
 use crate::adc::SealedAdcChannel;
 use crate::dma::Transfer;
