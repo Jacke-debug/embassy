@@ -515,7 +515,7 @@ impl<'d, T: Instance> Adc<'d, T> {
         
         // Start conversion
         T::regs().cr().modify(|reg| {
-            reg.set_jadstart(true);
+            reg.set_adstart(true);
         });
     }
 
@@ -583,7 +583,7 @@ impl<'d, T: Instance> Adc<'d, T> {
         
         // Start conversion
         T::regs().cr().modify(|reg| {
-            reg.set_adstart(true);
+            reg.set_jadstart(true);
         });
     }
 
